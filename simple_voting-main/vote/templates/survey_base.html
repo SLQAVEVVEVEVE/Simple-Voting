@@ -1,0 +1,43 @@
+<div class="survey-base">
+    <div class="title">
+        <p>{{ survey.title }}</p>
+    </div>
+    <div class="hidden-description">{{ survey.description }}</div>
+
+    {% if not survey.show_results %}
+        <form action="/api/survey/vote/" method="post">
+            {% csrf_token %}
+            {% if survey.allow_multiple %}
+            <div class="vote-options">
+                <div class="require-one-selected">
+                    {% for id, data in survey.vote_options.items %} 
+                        <div class="b_checkbox">
+                            <div class="custom-checkbox"></div>
+                            <input type="checkbox" id="{{id}}" value="{{id}}" name="choice_id">
+                            <label for="{{id}}">{{data.content}}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <button class="submit" disabled>Submit</button>
+            {% else %}
+            <div class="vote-options">
+                {% for id, data in survey.vote_options.items %}
+                    <button type="submit" value="{{id}}" name="choice_id" class="b_stand">{{ data.content }}</button>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </form>
+    {% else %}
+        <div class="vote-options">
+            {% for id, data in survey.vote_options.items %}
+                <div class="b_voted">
+                    <div class="vote-fraction" style="width: calc(100% * {{data.voted_fraction}});">
+                        <span class="percentage">{% widthratio data.voted_fraction 1 100 %}%</span>
+                    </div>
+                    <span class="label">{{ data.content }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>

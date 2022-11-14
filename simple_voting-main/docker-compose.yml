@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  django-app:
+    build: .
+    container_name: simple_voting
+    restart: unless-stopped
+    command: python manage.py runserver 0.0.0.0:8000 --noreload --insecure
+    ports:
+      - 8000:8000
+    volumes:
+      - ./db.sqlite3:/code/db.sqlite3
+      - ./media:/code/media
+  

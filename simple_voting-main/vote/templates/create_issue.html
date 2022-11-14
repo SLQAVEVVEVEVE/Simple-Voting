@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load tz %}
+
+{% block page_title %}
+Create Issue - Simple Votings
+{% endblock %}
+
+
+{% block content %}
+<h1>Create an issue right now!</h1>
+<p>You can create an issue here and we will send you a letter to fix your problem</p>
+<form action="/issue/create/" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <table>
+        {% for field in form %}
+        <tr>
+            <td>{{ field.label }}</td>
+            <td>{{ field }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+        <hr>
+        {%for error in errors%}
+        <b>{{ error }}</b>
+        <hr>
+        {%endfor%}
+
+    <button type="submit" style="margin-top: 1em;">send data to microsoft</button>
+</form>
+
+
+<p>Time on server: {{ current_time }}</p>
+
+
+
+{% endblock %}

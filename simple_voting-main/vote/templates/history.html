@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load tz %}
+{% load static %}
+
+{% block page_title %}
+Your history - Simple Votings
+{% endblock %}
+
+{% block content %} 
+<header class="title">Your voting history</header>
+<div id="user-surveys">
+    <div id="survey-container" class="surveys"></div>
+
+    <form id="load-more">
+        {% csrf_token %}
+        <input type="hidden" name="ajax-url" value="/api/survey/history/">
+        <button type="submit">Load more</button>    
+   </form>
+</div>
+{% endblock %}
+
+{% block popup %}
+{% include 'survey_popup.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/popup.js' %}"></script>
+<script src="{% static 'js/surveys.js' %}"></script>
+{% endblock %}

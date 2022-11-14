@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %}
+    {% if user == owner %}
+        Your account
+    {% else %}
+        {{owner.username}}'s account
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if user == owner %}
+    <header class="title">Your account</header>
+{% else %}
+    <header class="title">{{owner.username}}'s account</header>
+{% endif %}
+
+<div class="profile">
+    <div class="info">
+        {% if owner.profile_picture_file %}
+            <img src="{% get_media_prefix %}{{owner.profile_picture_file}}" alt="Avatar" class="avatar">
+        {% else %}
+            <img src="{% static 'img/default_profile_picture.png' %}" alt="Avatar" class="avatar">
+        {% endif %}
+
+        <p><b>Username: </b>{{owner.username}}</p>
+
+        {% if user == owner %}
+            <p><b>Email:</b> {{owner.email}}</p>
+        {% endif %}
+
+        <p><b>Surveys created:</b> {{number_of_surveys}}</p>
+
+        {% if owner.is_superuser %}
+        <p><b>[ Administrator ]</b></p>
+        {% endif %}
+
+        {% if user == owner %}
+            <a href="#popup">Edit profile</a>
+        {% endif %}
+    </div>
+
+    {% if best_survey %}
+    <div class="most-popular-container">
+        <h3>Most popular survey:</h3>
+        <div class="most-popular-survey-container">
+            {% with survey=best_survey %}
+                {% include 'survey_base.html' %}
+            {% endwith %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if user == owner %}
+    <header class="title">Your surveys</header>
+{% else %}
+    <header class="title">{{owner.username}}'s surveys</header>
+{% endif %}
+<div id="user-surveys">
+    <div id="survey-container" class="surveys"></div>
+
+    <form id="load-more">
+        {% csrf_token %}
+        <input type="hidden" name="ajax-url" value="/api/survey/user/">
+        <input type="hidden" name="user_id" value="{{owner.id}}">
+        <button type="submit">Load more</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/surveys.js' %}"></script>
+<script src="{% static 'js/popup.js' %}"></script>
+<script>
+    // Show filename when file is uploaded
+    function getName(str) {
+        let idx;
+        if (str.lastIndexOf('\\')) idx = str.lastIndexOf('\\') + 1;
+        else idx = str.lastIndexOf('/') + 1;
+
+        let filename = str.slice(idx);
+        let uploaded = document.getElementById("fileformlabel");
+        uploaded.innerHTML = filename;
+    }
+</script>
+{% if form_errors %}
+<script>
+    $(document).ready(function(){
+        window.location = '#popup'
+    });
+</script>
+{% endif %}  
+{% endblock %}
+
+
+{% block popup %}
+{% include 'survey_popup.html' %}
+<div id="popup" class="overlay">
+    <div class="popup">
+        <header>
+            <span>Edit account</span>
+            <a class="close" href="#">&times;</a>
+        </header>
+        <div class="content">
+            <form action="/account/" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="checkbox" name="allow_multiple" id="id_allow_multiple" hidden>
+
+                <div class="field">
+                    <span class="label">Username:</span>
+                    <input type="text" name="username" maxlength="50" id="id_username">
+                </div>
+
+                <div class="field">
+                    <span class="label">Email:</span>
+                    <input type="email" name="email" maxlength="254" id="id_email">
+                </div>
+
+                <div class="field">
+                    <span class="label">New password:</span>
+                    <input type="password" name="password" minlength="8" maxlength="128" id="id_password">
+                </div>
+
+                <div class="field">
+                    <span class="label">Confirm new password:</span>
+                    <input type="password" name="confirm_password" minlength="8" maxlength="128" id="id_confirm_password">
+                </div>
+                
+                <div class="field">
+                    <span class="label">Upload profile picture:</span>
+                    <div class="fileform">
+                        <div id="fileformlabel"></div>
+                        <div class="selectbutton">Browse</div>
+                        <input type="file" name="profile_picture" id="id_profile_picture" onchange="getName(this.value);"/>
+                    </div>
+                </div>
+                
+                {% if form_errors %} 
+                <div class="field">
+                    <div class="error">
+                        {% for error in form_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %} 
+                
+                <div class="send-button-container">
+                    <button type="submit" class="send_button">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
