@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}
+Issue Chats - Simple Votings
+{% endblock %}
+
+{% block content %} 
+{% if not user.is_superuser %}
+<div class="block">
+    <a href="#popup" class="standart_button">Create an issue</a>
+</div>
+{% endif %}
+
+<header class="title">User issues</header>
+
+<div class="issue-container">
+    <div class="container color-white">
+        <div class="issue">
+            {%for issue_title in issues_arr%}
+                <a href="/issue/messages?id={{issue_title.id}}">
+                    <p>{{issue_title.title}}</p>
+                    
+                    {% if issue_title.is_closed %}
+                        <b>[closed]</b>
+                    {% endif %}
+                </a>
+            {%endfor%}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block popup %}
+{% if user %}
+    <div id="popup" class="overlay">
+        <div class="popup">
+            <div class="header_for_pop_up">
+                <header>Create issue</header>
+                <a class="close" href="#">&times;</a>
+            </div>
+            <div class="content">
+                <form action="/issue/create/" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="field">
+                        <span class="label">Title:</span>
+                        <input type="text" name="title" maxlength="100" minlength="10" required id="id_title">
+                    </div>
+                    
+                    <div class="field">
+                        <span class="label">Description:</span>
+                        <textarea name="content" id="id_content" wrap="soft" cols="40" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="field">
+                        <span class="label">Upload screenshot:</span>
+                        <div class="fileform">
+                            <div id="fileformlabel"></div>
+                            <div class="selectbutton">Browse</div>
+                            <input type="file" name="trouble_file" id="id_trouble_file" onchange="getName(this.value);"/>
+                        </div>
+                    </div>
+
+                    {% if form_errors %} 
+                    <div class="field">
+                        <div class="error">
+                            {% for error in form_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %} 
+                    
+                    <div class="send-button-container">
+                        <button type="submit" class="send_button">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/popup.js' %}"></script>
+<script>
+    // Show filename when file is uploaded
+    function getName(str) {
+        let idx;
+        if (str.lastIndexOf('\\')) idx = str.lastIndexOf('\\') + 1;
+        else idx = str.lastIndexOf('/') + 1;
+
+        let filename = str.slice(idx);
+        let uploaded = document.getElementById("fileformlabel");
+        uploaded.innerHTML = filename;
+    }
+</script>
+{% endblock %}

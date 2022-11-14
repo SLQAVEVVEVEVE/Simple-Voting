@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% if user.is_superuser %}
+<header class="title">Chat with {{current_issue.user.username}}</header>
+{% else %}
+<header class="title">Support</header>
+{% endif %} 
+
+<div class="block">
+    <div class="issue-header">
+        <header>{{current_issue.title}}</header>
+        
+        {% if not current_issue.is_closed and not user.is_superuser %}
+        <form action="/issue/close/" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="issue_id" value="{{current_issue.id}}">
+            <button type="submit">Close issue</button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="msg-container">
+        {% for issue_msg in issue_msg_arr %}
+            <div class="msg">
+                {% if issue_msg.from_support %}
+                    {% if issue_msg.content %}
+                        <div class="support">{{issue_msg.content}}</div>
+                    {% endif %}
+                    {% if issue_msg.trouble_file %}
+                        <img class="support" src="{% get_media_prefix %}{{ issue_msg.trouble_file }}">
+                    {% endif %}
+                {% else %}
+                    {% if issue_msg.content %}
+                        <div class="user">{{issue_msg.content}}</div>
+                    {% endif %}
+                    {% if issue_msg.trouble_file %}
+                        <img class="user" src="{% get_media_prefix %}{{ issue_msg.trouble_file }}">
+                    {% endif %}
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+    {% if not current_issue.is_closed %}
+    <form action="/issue/messages/" method="post" enctype="multipart/form-data" class="user-input">
+        {% csrf_token %}
+        <input type="hidden" name="issue_id" value="{{current_issue.id}}">
+
+        <div class="fileform">
+            <div id="fileformlabel"></div>
+            <div class="selectbutton">Browse</div>
+            <input type="file" name="trouble_file" id="id_trouble_file" onchange="getName(this.value);"/>
+        </div>
+        <div class="flex-container">
+            <textarea type="text" name="content" autocomplete="off" required rows="1" id="id_content" class="user-msg"></textarea>
+            <button class="send-msg-btn">send</button>
+        </div>
+    </div>
+    {% else %}
+    <div class="closed-help-container">
+        <div class="closed-help">This issue was closed. Now it's read-only.</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(() => {
+        $(".msg-container").scrollTop($(".msg-container")[0].scrollHeight);
+    });
+    function getName(str) {
+        let idx;
+        if (str.lastIndexOf('\\')) idx = str.lastIndexOf('\\') + 1;
+        else idx = str.lastIndexOf('/') + 1;
+
+        let filename = str.slice(idx);
+        let uploaded = document.getElementById("fileformlabel");
+        uploaded.innerHTML = filename;
+    }
+</script>
+{% endblock %}

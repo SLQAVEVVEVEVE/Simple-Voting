@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block page_title %}
+Sign up - Simple Votings
+{% endblock %}
+
+{% block content %} 
+<div class="login-signup-container">
+    <div class="top_line">
+        <header class="text_1">Start voting on Simple Votings</header>
+        <a href="/"><i class='bx bx-x' href="main.html"></i></a>
+    </div>
+    
+    <form action="/account/signup/" method="post" class="middle_line">
+        {% csrf_token %}
+        <div class="field">
+            <p class="text_2">Username</p>
+            <input type="text" name="username" maxlength="254" required id="id_username">
+        </div> 
+        <div class="field">
+            <p class="text_2">Email</p>
+            <input type="email" name="email" maxlength="254" required id="id_email">
+        </div> 
+        <div class="field">
+            <p class="text_2">Password</p>
+            <input type="password" name="password" maxlength="128" minlength="8" required id="id_passw">
+        </div>
+        <div class="field">
+            <p class="text_2">Confirm password</p>
+            <input type="password" name="confirm_password" maxlength="128" minlength="8" required id="id_confirm_passw">
+        </div>
+
+        {% if form_errors %} 
+            <div class="error">
+                {% for error in form_errors %}
+                    <p>{{ error }}</з>
+                {% endfor %}
+            </div>
+        {% endif %} 
+
+        <button>Get started</button>
+    </form>
+
+    <div class="bottom_line">
+        <p>Already have an account?</p>
+        <a href="/account/login">Log in instead</a>
+    </div>
+</div>
+{% endblock %}
